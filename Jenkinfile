@@ -9,5 +9,28 @@ pipeline {
                 git branch: 'main', changelog: false, poll: false, url: 'https://github.com/saeedhmohd244/ekart.git'
             }
         }
+    stage('SonarQube Analysis') {
+    steps {
+        withSonarQubeEnv('sonar-scanner') {
+            sh "mvn clean verify sonar:sonar -Dsonar.projectKey=ekart -Dsonar.projectName='ekart'"
+                }
+            }
+        }
+    stage('dependency check'){
+            steps{
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DC-check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+    stage("Docker Build & Push"){
+            steps{
+                script{
+                   withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
+                       sh "docker build -t ekart ."
+                       sh "docker tag zomato saeedhmohd244/ekart:latest "
+                       sh "docker push saeedhmohd244/ekart:latest "
+                    }
+                }
+            }
     }
 }

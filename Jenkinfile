@@ -1,0 +1,13 @@
+pipeline {
+    agent {
+        label 'slave'  
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/saeedhmohd244/ekart.git'
+            }
+        }
+    }
+}
